@@ -58,11 +58,11 @@ public class VCIssuanceController {
     }
 
     /**
-     * API to fetch credential status information based on filters
-     * @param request Credential fetch request containing filters
-     * @return Credential status information
+     * API to revoke
+     * @param request Credential revoke request
+     * @return Credential revocation status: success or failure
      */
-    @GetMapping(path = "/revoke", produces = "application/json")
+    @PostMapping(path = "/revoke", produces = "application/json")
     public CredentialRevocationResponse fetchCredential(
             @javax.validation.Valid @RequestBody CredentialRevocationRequest request) throws CredentialNotFoundException {
         return revocationService.revokeCredential(request);

@@ -171,7 +171,7 @@ public class RevocationServiceImpl implements RevocationService {
             credential.setRevocationReason(request.getRevocationReason());
 
             if (request.getRevocationProof() != null) {
-                credential.setRevocationProof(request.getRevocationProof());
+                credential.setRevocationProof(request.getRevocationProof().getJwt());
             }
 
             // Update the status list credential

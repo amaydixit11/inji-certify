@@ -14,5 +14,5 @@ import java.util.List;
 public class CredentialRevocationRequest {
     private String credentialId;
     private String revocationReason;
-    private String revocationProof;
+    private CredentialProof revocationProof;
 }
