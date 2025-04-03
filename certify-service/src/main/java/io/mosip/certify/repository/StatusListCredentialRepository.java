@@ -12,9 +12,11 @@ import java.util.Optional;
 
 @Repository
 public interface StatusListCredentialRepository extends JpaRepository<StatusListCredential, String> {
-    
+
     List<StatusListCredential> findByIssuerId(String issuerId);
-    
+
+    Optional<StatusListCredential> findById(String id);
+
     List<StatusListCredential> findByStatusPurpose(String statusPurpose);
     
     Optional<StatusListCredential> findByIssuerIdAndStatusPurpose(String issuerId, String statusPurpose);

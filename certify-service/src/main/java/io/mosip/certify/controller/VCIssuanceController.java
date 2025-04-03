@@ -5,12 +5,12 @@
  */
 package io.mosip.certify.controller;
 
-import io.mosip.certify.core.dto.CredentialRequest;
-import io.mosip.certify.core.dto.CredentialResponse;
-import io.mosip.certify.core.dto.VCError;
+import io.mosip.certify.core.dto.*;
 import io.mosip.certify.core.exception.CertifyException;
 import io.mosip.certify.core.spi.VCIssuanceService;
+import io.mosip.certify.exception.CredentialNotFoundException;
 import io.mosip.certify.exception.InvalidNonceException;
+import io.mosip.certify.services.RevocationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -30,6 +30,9 @@ public class VCIssuanceController {
     private VCIssuanceService vcIssuanceService;
 
     @Autowired
+    private RevocationService revocationService;
+
+    @Autowired
     MessageSource messageSource;
 
     /**
@@ -43,6 +46,27 @@ public class VCIssuanceController {
         return vcIssuanceService.getCredential(credentialRequest);
     }
 
+    /**
+     * API to fetch credential status information based on filters
+     * @param request Credential fetch request containing filters
+     * @return Credential status information
+     */
+    @GetMapping(path = "/fetch", produces = "application/json")
+    public CredentialFetchResponse fetchCredential(
+            @javax.validation.Valid @RequestBody CredentialFetchRequest request) throws CredentialNotFoundException {
+        return revocationService.fetchCredential(request);
+    }
+
+    /**
+     * API to fetch credential status information based on filters
+     * @param request Credential fetch request containing filters
+     * @return Credential status information
+     */
+    @GetMapping(path = "/revoke", produces = "application/json")
+    public CredentialRevocationResponse fetchCredential(
+            @javax.validation.Valid @RequestBody CredentialRevocationRequest request) throws CredentialNotFoundException {
+        return revocationService.revokeCredential(request);
+    }
 
     /**
      * 1. The credential Endpoint MUST accept Access Tokens
