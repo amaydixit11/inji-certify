@@ -32,53 +32,6 @@ public class RevocationServiceImpl implements RevocationService {
     @Autowired
     private BitStringStatusListService bitStringStatusListService;
 
-//    /**
-//     * Issue a credential with status tracking capabilities
-//     * @param request The credential issuance request
-//     * @return The issued credential response
-//     * @throws CredentialIssuanceException if credential issuance fails
-//     */
-//    @Override
-//    @Transactional
-//    public CredentialIssuanceResponse issueCredential(CredentialIssuanceRequest request) throws CredentialIssuanceException {
-//        try {
-//            // Generate a unique status list index
-//            String statusListIndex = String.valueOf(Math.abs(UUID.randomUUID().hashCode()));
-//
-//            // Get or create status list credential URL
-//            String statusListCredentialUrl = getOrCreateStatusListCredential(request.getIssuerId());
-//
-//            // Add status tracking info to the request
-//            // Here you would enhance your existing credential request with status info
-//
-//            // Issue the credential using existing service
-//            CredentialResponse credentialResponse = certifyIssuanceService.issueCredential(request);
-//
-//            // After successful issuance, save to ledger
-//            LedgerIssuanceTable ledgerEntry = new LedgerIssuanceTable();
-//            ledgerEntry.setCredentialId(credentialResponse.getCredentialId());
-//            ledgerEntry.setIssuerId(request.getIssuerId());
-//            ledgerEntry.setStatusListIndex(statusListIndex);
-//            ledgerEntry.setStatusListCredential(statusListCredentialUrl);
-//            ledgerEntry.setStatusPurpose("revocation");
-//            ledgerEntry.setCredentialStatus("valid");
-//            ledgerEntry.setIssueDate(LocalDateTime.now());
-//
-//            if (request.getExpirationDate() != null) {
-//                ledgerEntry.setExpirationDate(request.getExpirationDate());
-//            }
-//
-//            ledgerEntry.setHolderInfo(request.getHolderInfo());
-//            ledgerEntry.setCredentialType(request.getCredentialType());
-//
-//            ledgerRepository.save(ledgerEntry);
-//
-//            return credentialResponse;
-//        } catch (Exception e) {
-//            throw new CredentialIssuanceException("Error issuing credential with status tracking: " + e.getMessage(), e);
-//        }
-//    }
-
     /**
      * Fetch credential status information based on filters
      * @param request The credential fetch request containing filters
@@ -191,3 +144,5 @@ public class RevocationServiceImpl implements RevocationService {
     }
 
 }
+
+
