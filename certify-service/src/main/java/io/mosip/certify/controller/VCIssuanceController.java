@@ -53,7 +53,8 @@ public class VCIssuanceController {
      */
     @GetMapping(path = "/fetch", produces = "application/json")
     public CredentialFetchResponse fetchCredential(
-            @javax.validation.Valid @RequestBody CredentialFetchRequest request) throws CredentialNotFoundException {
+//            @javax.validation.Valid @RequestBody CredentialFetchRequest request) throws CredentialNotFoundException {
+            @ModelAttribute CredentialFetchRequest request) throws CredentialNotFoundException {
         return revocationService.fetchCredential(request);
     }
 

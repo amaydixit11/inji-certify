@@ -49,19 +49,12 @@ public class RevocationServiceImpl implements RevocationService {
             }
 
             // Return the first matching credential
-            // You could modify this to return multiple if needed
             LedgerIssuanceTable credential = credentials.get(0);
 
             CredentialFetchResponse response = new CredentialFetchResponse();
-//            response.setCredentialId(credential.getCredentialId());
             response.setStatusPurpose(credential.getStatusPurpose());
             response.setStatusListIndex(credential.getStatusListIndex().toString());
             response.setStatusListCredential(credential.getStatusListCredential());
-//            response.setCredentialStatus(credential.getCredentialStatus());
-//            response.setRevocationReason(credential.getRevocationReason());
-//            response.setRevocationTimestamp(credential.getRevocationTimestamp());
-//            response.setIssueDate(credential.getIssueDate());
-//            response.setExpirationDate(credential.getExpirationDate());
 
             return response;
         } catch (CredentialNotFoundException e) {

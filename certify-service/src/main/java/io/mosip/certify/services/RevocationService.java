@@ -7,15 +7,6 @@ import io.mosip.certify.exception.RevocationException;
 
 public interface RevocationService {
 
-//    /**
-//     * Issue a credential with status tracking capabilities.
-//     *
-//     * @param request The credential issuance request.
-//     * @return The issued credential response.
-//     * @throws CredentialIssuanceException if credential issuance fails.
-//     */
-//    CredentialIssuanceResponse issueCredential(CredentialIssuanceRequest request) throws CredentialIssuanceException;
-
     /**
      * Fetch credential status information based on filters.
      *
