@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 @Slf4j
@@ -32,55 +34,6 @@ public class BitStringStatusListService {
     @Autowired
     private LedgerIssuanceTableRepository ledgerIssuanceTableRepository;
 
-    /**
-     * Generate Status List Credential as per Section 3.3 Bitstring Generation Algorithm
-     *
-     * @param issuerId Issuer identifier
-     * @param statusPurpose Purpose of the status list (e.g., "revocation")
-     * @return URL of the generated status list credential
-     */
-    public String generateStatusListCredential(String issuerId, String statusPurpose, String domainUrl) {
-
-        Optional<StatusListCredential> existingList = statusListCredentialRepository
-                .findByIssuerIdAndStatusPurpose(issuerId, statusPurpose);
-        log.info("ExistingList: {}", existingList);
-
-        if (existingList.isPresent()) {
-            return existingList.get().getId();
-        }
-        // Initialize bitstring of minimum 16 KB size, all bits set to 0
-        byte[] bitstring = new byte[MINIMUM_BITSTRING_SIZE];
-
-        // Find all issued credentials for this issuer and status purpose
-        List<LedgerIssuanceTable> issuedCredentials = ledgerIssuanceTableRepository
-                .findByIssuerIdAndStatusPurpose(issuerId, statusPurpose);
-
-        // Set status for each credential
-        for (LedgerIssuanceTable credential : issuedCredentials) {
-            int index = (int) (credential.getStatusListIndex() * STATUS_SIZE);
-            if (index < bitstring.length) {
-                // Set the appropriate bit based on credential status
-                bitstring[index] = credential.getCredentialStatus().equals("revoked") ? (byte) 1 : (byte) 0;
-            }
-        }
-
-        // Compress bitstring using GZIP
-        String compressedBitstring = compressAndEncodebitstring(bitstring);
-
-        // Create or update status list credential
-        String statusListId = domainUrl + "/credential/status/" + UUID.randomUUID().toString();
-        StatusListCredential statusList = new StatusListCredential();
-        statusList.setId(statusListId);
-        statusList.setIssuerId(issuerId);
-        statusList.setStatusPurpose(statusPurpose);
-        statusList.setEncodedList(compressedBitstring);
-        statusList.setListSize(issuedCredentials.size());
-        statusList.setValidFrom(LocalDateTime.now());
-
-        statusListCredentialRepository.save(statusList);
-
-        return statusListId;
-    }
 
     /**
      * Validate Credential Status as per Section 3.2 Validate Algorithm
@@ -124,23 +77,6 @@ public class BitStringStatusListService {
         return uncompressedBitstring[index] == 0;
     }
 
-    /**
-     * Compress bitstring using GZIP and encode using Base64url
-     *
-     * @param bitstring Uncompressed bitstring
-     * @return Compressed and Base64url encoded bitstring
-     */
-    private String compressAndEncodebitstring(byte[] bitstring) {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             GZIPOutputStream gzipOS = new GZIPOutputStream(baos)) {
-            gzipOS.write(bitstring);
-            gzipOS.close();
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(baos.toByteArray());
-        } catch (IOException e) {
-            log.error("Error compressing bitstring", e);
-            throw new RuntimeException("Bitstring Compression Failed", e);
-        }
-    }
 
     /**
      * Decompress bitstring from Base64url and GZIP
@@ -151,9 +87,18 @@ public class BitStringStatusListService {
     private byte[] decompressAndDecodebitstring(String compressedBitstring) {
         try {
             byte[] compressedBytes = Base64.getUrlDecoder().decode(compressedBitstring);
-            // Implement GZIP decompression logic here
-            // This is a placeholder and needs proper GZIP decompression implementation
-            return compressedBytes;
+            ByteArrayInputStream bais = new ByteArrayInputStream(compressedBytes);
+            GZIPInputStream gzipIS = new GZIPInputStream(bais);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = gzipIS.read(buffer)) > 0) {
+                baos.write(buffer, 0, len);
+            }
+
+            gzipIS.close();
+            return baos.toByteArray();
         } catch (Exception e) {
             log.error("Error decompressing bitstring", e);
             throw new RuntimeException("Bitstring Decompression Failed", e);
@@ -185,7 +130,7 @@ public class BitStringStatusListService {
             String encodedList = statusList.getEncodedList();
 
             // 3. Decompress the bitstring to a mutable format
-            byte[] bitstring = BitStringUtils.expandCompressedList(encodedList);
+            byte[] bitstring = BitStringUtils.toByteArray(BitStringUtils.expandCompressedList(encodedList), MINIMUM_BITSTRING_SIZE);
 
             // 4. Set the bit at the credential's index to 1 (revoked)
             BitStringUtils.setBitAtIndex(bitstring, statusListIndex, (byte) 1);
