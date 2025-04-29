@@ -1,10 +1,10 @@
 package io.mosip.certify.services;
 
-import io.mosip.certify.entity.StatusListCredential;
-import io.mosip.certify.entity.LedgerIssuanceTable;
+import io.mosip.certify.entity.StatusListCredentials;
+import io.mosip.certify.entity.Ledger;
 import io.mosip.certify.exception.RevocationException;
+import io.mosip.certify.repository.LedgerRepository;
 import io.mosip.certify.repository.StatusListCredentialRepository;
-import io.mosip.certify.repository.LedgerIssuanceTableRepository;
 import io.mosip.certify.utils.BitStringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -25,14 +21,14 @@ import java.util.zip.GZIPOutputStream;
 @Service
 public class BitStringStatusListService {
 
-    private static final int MINIMUM_BITSTRING_SIZE = 16 * 1024; // 16 KB
+    private static final int MINIMUM_BITSTRING_SIZE = 131072; // 16 KB
     private static final int STATUS_SIZE = 1; // Default status size as per spec
 
     @Autowired
     private StatusListCredentialRepository statusListCredentialRepository;
 
     @Autowired
-    private LedgerIssuanceTableRepository ledgerIssuanceTableRepository;
+    private LedgerRepository ledgerRepository;
 
 
     /**
@@ -45,19 +41,15 @@ public class BitStringStatusListService {
      */
     public boolean validateCredentialStatus(String statusListCredentialUrl, long statusListIndex, String statusPurpose) {
         // Retrieve status list credential
-        Optional<StatusListCredential> statusListOptional =
+        Optional<StatusListCredentials> statusListOptional =
                 statusListCredentialRepository.findById(statusListCredentialUrl);
 
         if (statusListOptional.isEmpty()) {
             throw new RuntimeException("Status List Credential not found");
         }
 
-        StatusListCredential statusList = statusListOptional.get();
+        StatusListCredentials statusList = statusListOptional.get();
 
-        // Verify status purpose matches
-        if (!statusPurpose.equals(statusList.getStatusPurpose())) {
-            throw new RuntimeException("Status Purpose Mismatch");
-        }
 
         // Expand compressed bitstring
         byte[] uncompressedBitstring = decompressAndDecodebitstring(statusList.getEncodedList());
@@ -110,55 +102,74 @@ public class BitStringStatusListService {
      * @param credential The credential being revoked
      * @throws RevocationException if there's an error updating the bitstring
      */
-    public void updateStatusListBitstring(LedgerIssuanceTable credential) throws RevocationException {
+    public void updateStatusListBitstring(Ledger credential) throws RevocationException {
+        log.info("Starting to update status list bitstring for credential: {}", credential.getCredentialId());
         try {
-            String statusListCredentialUrl = credential.getStatusListCredential();
+            String statusListCredentialUrl = credential.getStatusListCredentialUrl();
             String statusPurpose = credential.getStatusPurpose();
             long statusListIndex = credential.getStatusListIndex();
 
+            log.info("Status list details - URL: {}, Purpose: {}, Index: {}",
+                    statusListCredentialUrl, statusPurpose, statusListIndex);
+
             // 1. Get the status list credential from the URL
-            Optional<StatusListCredential> statusListOptional =
+            log.info("Fetching status list credential from repository");
+            Optional<StatusListCredentials> statusListOptional =
                     statusListCredentialRepository.findById(statusListCredentialUrl);
 
             if (statusListOptional.isEmpty()) {
+                log.error("Status List Credential not found for URL: {}", statusListCredentialUrl);
                 throw new RevocationException("Status List Credential not found for URL: " + statusListCredentialUrl);
             }
 
-            StatusListCredential statusList = statusListOptional.get();
+            StatusListCredentials statusList = statusListOptional.get();
+            log.info("Retrieved status list credential: {}", statusList.getId());
 
             // 2. Get the compressed bitstring
             String encodedList = statusList.getEncodedList();
+            log.info("Retrieved encoded list of size: {}",
+                    encodedList != null ? encodedList.length() : "null");
 
             // 3. Decompress the bitstring to a mutable format
+            log.info("Decompressing bitstring to byte array");
             byte[] bitstring = BitStringUtils.toByteArray(BitStringUtils.expandCompressedList(encodedList), MINIMUM_BITSTRING_SIZE);
+            log.info("Decompressed bitstring to byte array of size: {}", bitstring.length);
 
             // 4. Set the bit at the credential's index to 1 (revoked)
+            log.info("Setting bit at index {} to 1 (revoked)", statusListIndex);
             BitStringUtils.setBitAtIndex(bitstring, statusListIndex, (byte) 1);
+            log.info("Bit successfully set at index {}", statusListIndex);
 
             // 5. Compress the updated bitstring
+            log.info("Compressing updated bitstring");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (GZIPOutputStream gzipOS = new GZIPOutputStream(baos)) {
                 gzipOS.write(bitstring);
+                log.info("Wrote {} bytes to GZIP output stream", bitstring.length);
             }
             String updatedEncodedList = Base64.getUrlEncoder().withoutPadding().encodeToString(baos.toByteArray());
+            log.info("Compressed updated bitstring to encoded list of size: {}", updatedEncodedList.length());
 
             // 6. Update the status list credential with the new bitstring
+            log.info("Updating status list credential with new encoded list");
             statusList.setEncodedList(updatedEncodedList);
 
             // 7. Update the timestamp and other metadata
             // statusList.setLastUpdated(LocalDateTime.now());
+            log.info("Metadata update step (currently commented out)");
 
             // 8. Generate cryptographic proof for the updated status list
             // This would typically involve creating a digital signature or other cryptographic proof
             // For now, we'll leave this as a placeholder
             // statusList.setProof(generateProof(statusList));
+            log.info("Proof generation step (currently commented out)");
 
             // 9. Save the updated status list credential
+            log.info("Saving updated status list credential to repository");
             statusListCredentialRepository.save(statusList);
-
-            log.info("Updated status list bitstring for credential ID: {}", credential.getCredentialId());
+            log.info("Successfully updated status list bitstring for credential ID: {}", credential.getCredentialId());
         } catch (Exception e) {
-            log.error("Failed to update status list bitstring", e);
+            log.error("Failed to update status list bitstring for credential ID: {}", credential.getCredentialId(), e);
             throw new RevocationException("Failed to update status list bitstring: " + e.getMessage(), e);
         }
     }

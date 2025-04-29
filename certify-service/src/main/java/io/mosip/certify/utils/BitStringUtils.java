@@ -1,9 +1,8 @@
 package io.mosip.certify.utils;
 
-import io.mosip.certify.entity.LedgerIssuanceTable;
-import io.mosip.certify.entity.StatusListCredential;
+import io.mosip.certify.entity.Ledger;
+import io.mosip.certify.entity.StatusListCredentials;
 import io.mosip.certify.exception.BitstringStatusListException;
-import io.mosip.certify.exception.RevocationException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,7 +27,7 @@ public class BitStringUtils {
         int bitPosition = (int) (index % 8);
 
         if (byteIndex >= bitstring.length) {
-            throw new IndexOutOfBoundsException("Index out of bounds for bitstring");
+            throw new IndexOutOfBoundsException(byteIndex + " Index out of bounds for bitstring " + bitstring.length);
         }
 
         if (value == 1) {
@@ -83,13 +82,13 @@ public class BitStringUtils {
      * @return Base64url encoded compressed bitstring
      * @throws BitstringStatusListException if generation fails
      */
-    public static String generateBitstring(List<LedgerIssuanceTable> issuedCredentials, int statusSize) throws BitstringStatusListException {
+    public static String generateBitstring(List<Ledger> issuedCredentials, int statusSize) throws BitstringStatusListException {
         try {
             // Create a bitstring with minimum size (16KB)
             BitSet bitstring = new BitSet(MINIMUM_BITSTRING_SIZE);
 
             // Set bits for each credential based on its status
-            for (LedgerIssuanceTable credential : issuedCredentials) {
+            for (Ledger credential : issuedCredentials) {
                 long statusListIndex = credential.getStatusListIndex();
 
                 // If the credential is revoked/suspended (not valid), set the appropriate bit
@@ -219,28 +218,28 @@ public class BitStringUtils {
      * Implements Section 3.2 of the W3C Bitstring Status List specification
      *
      * @param credential The credential to validate
-     * @param statusListCredential The status list credential
+     * @param statusListCredentials The status list credential
      * @return A map containing validation results
      * @throws BitstringStatusListException if validation fails
      */
     public static Map<String, Object> validateCredential(
-            LedgerIssuanceTable credential,
-            StatusListCredential statusListCredential) throws BitstringStatusListException {
+            Ledger credential,
+            StatusListCredentials statusListCredentials) throws BitstringStatusListException {
 
         // Verify that status purposes match
-        if (!credential.getStatusPurpose().equals(statusListCredential.getStatusPurpose())) {
+        if (!credential.getStatusPurpose().equals(statusListCredentials.getStatusPurpose())) {
             throw new BitstringStatusListException("STATUS_VERIFICATION_ERROR",
                     "Status purpose mismatch between credential and status list");
         }
 
         // Get the compressed bitstring
-        String compressedBitstring = statusListCredential.getEncodedList();
+        String compressedBitstring = statusListCredentials.getEncodedList();
 
         // Expand the bitstring
         BitSet expandedBitstring = expandCompressedList(compressedBitstring);
 
         // Check the minimum bitstring size requirement
-        int statusSize = statusListCredential.getStatusSize() != null ? statusListCredential.getStatusSize() : 1;
+        int statusSize = statusListCredentials.getStatusSize() != null ? statusListCredentials.getStatusSize() : 1;
         if (expandedBitstring.size() / statusSize < MINIMUM_BITSTRING_SIZE) {
             throw new BitstringStatusListException("STATUS_LIST_LENGTH_ERROR",
                     "Status list length does not meet minimum length requirement");
@@ -294,8 +293,8 @@ public class BitStringUtils {
      * @return A complete StatusListCredential entity
      * @throws BitstringStatusListException if generation fails
      */
-    public static StatusListCredential generateStatusListCredential(
-            List<LedgerIssuanceTable> issuedCredentials,
+    public static StatusListCredentials generateStatusListCredential(
+            List<Ledger> issuedCredentials,
             String issuer,
             String statusPurpose,
             String domainUrl,
@@ -306,17 +305,17 @@ public class BitStringUtils {
         String encodedList = generateBitstring(issuedCredentials, statusSize);
         String statusListId = domainUrl + "/credential/status/" + UUID.randomUUID().toString();
         // Create and return the status list credential
-        StatusListCredential statusListCredential = new StatusListCredential();
-        statusListCredential.setId(statusListId);
-        statusListCredential.setIssuerId(issuer);
-        statusListCredential.setType("BitstringStatusListCredential");
-        statusListCredential.setEncodedList(encodedList);
-        statusListCredential.setListSize(MINIMUM_BITSTRING_SIZE);
-        statusListCredential.setStatusPurpose(statusPurpose);
-        statusListCredential.setStatusSize(statusSize);
-        statusListCredential.setValidFrom(java.time.LocalDateTime.now());
+        StatusListCredentials statusListCredentials = new StatusListCredentials();
+        statusListCredentials.setId(statusListId);
+        statusListCredentials.setIssuerId(issuer);
+        statusListCredentials.setType("BitstringStatusListCredential");
+        statusListCredentials.setEncodedList(encodedList);
+        statusListCredentials.setListSize(MINIMUM_BITSTRING_SIZE);
+        statusListCredentials.setStatusPurpose(statusPurpose);
+        statusListCredentials.setStatusSize(statusSize);
+        statusListCredentials.setValidFrom(java.time.LocalDateTime.now());
 
-        return statusListCredential;
+        return statusListCredentials;
     }
 
 
