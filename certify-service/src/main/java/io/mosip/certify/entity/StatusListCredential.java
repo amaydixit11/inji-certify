@@ -1,51 +1,57 @@
+// StatusListCredential.java
 package io.mosip.certify.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "status_list_credential", uniqueConstraints = @UniqueConstraint(columnNames = {"issuer_id", "status_purpose"}))
-@Getter
-@Setter
+@Table(name = "status_list_credential")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class StatusListCredential {
+
     @Id
     private String id;
 
-    @Column(name = "issuer_id", nullable = false)
-    private String issuerId;
-
-    @Column(name = "type", nullable = false, columnDefinition = "VARCHAR(100) DEFAULT 'BitstringStatusListCredential'")
-    private String type = "BitstringStatusListCredential";
-
+    @Column(name = "vc_document", nullable = false)
     @Lob
-    @Column(name = "encoded_list", nullable = false)
-    private String encodedList;
+    private byte[] vcDocument;
 
-    @Column(name = "list_size", nullable = false)
-    private Integer listSize;
+    @Column(name = "credential_type", nullable = false)
+    private String credentialType;
 
-    @Column(name = "status_purpose", nullable = false)
+    @Column(name = "status_purpose")
     private String statusPurpose;
 
-    @Column(name = "status_size", columnDefinition = "integer DEFAULT 1")
-    private Integer statusSize = 1;
+    @Column(name = "capacity")
+    private Long capacity;
 
-    @Column(name = "status_messages", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private String statusMessages;
+    @Column(name = "credential_status")
+    @Enumerated(EnumType.STRING)
+    private CredentialStatus credentialStatus;
 
-    @Column(name = "valid_from", nullable = false)
-    private LocalDateTime validFrom;
+    @Column(name = "cr_dtimes", nullable = false, updatable = false)
+    private LocalDateTime createdDtimes;
 
-    @Column(name = "valid_until")
-    private LocalDateTime validUntil;
+    @Column(name = "upd_dtimes")
+    private LocalDateTime updatedDtimes;
 
-    @Column(name = "ttl")
-    private Long ttl;
+    @PrePersist
+    protected void onCreate() {
+        createdDtimes = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedDtimes = LocalDateTime.now();
+    }
+
+    public enum CredentialStatus {
+        AVAILABLE, FULL
+    }
 }
