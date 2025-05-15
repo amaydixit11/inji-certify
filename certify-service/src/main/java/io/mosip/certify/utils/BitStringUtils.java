@@ -1,9 +1,6 @@
 package io.mosip.certify.utils;
 
-import io.mosip.certify.entity.LedgerIssuanceTable;
-import io.mosip.certify.entity.StatusListCredential;
 import io.mosip.certify.exception.BitstringStatusListException;
-import io.mosip.certify.exception.RevocationException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

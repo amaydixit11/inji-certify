@@ -24,10 +24,6 @@ import io.mosip.certify.core.spi.VCIssuanceService;
 import io.mosip.certify.core.util.AuditHelper;
 import io.mosip.certify.core.util.SecurityHelperService;
 import io.mosip.certify.api.spi.DataProviderPlugin;
-import io.mosip.certify.entity.LedgerIssuanceTable;
-import io.mosip.certify.entity.StatusListCredential;
-import io.mosip.certify.exception.BitstringStatusListException;
-import io.mosip.certify.repository.LedgerIssuanceTableRepository;
 import io.mosip.certify.repository.StatusListCredentialRepository;
 import io.mosip.certify.utils.BitStringUtils;
 import io.mosip.certify.vcformatters.VCFormatter;
@@ -115,9 +111,6 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
     private KeymanagerService keymanagerService;
 
     @Autowired
-    private LedgerIssuanceTableRepository ledgerIssuanceTableRepository;
-
-    @Autowired
     private StatusListCredentialRepository statusListCredentialRepository;
 
     @Autowired
@@ -166,29 +159,13 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
             throw new CertifyException(ErrorConstants.INVALID_PROOF);
         }
 
-        // Add CredentialStatus Property
-        long statusListIndex = generateUniqueStatusListIndex();
-        String statusListCredentialUrl = getOrCreateStatusListCredential(issuerId, "revocation");
-
-        LedgerIssuanceTable ledgerIssuanceTable = new LedgerIssuanceTable();
-        ledgerIssuanceTable.setId(statusListCredentialUrl+"#"+statusListIndex);
-        ledgerIssuanceTable.setHolderId(proofValidator.getKeyMaterial(credentialRequest.getProof()));
-        ledgerIssuanceTable.setCredentialId(statusListCredentialUrl+"#"+statusListIndex);
-        ledgerIssuanceTable.setIssuerId(issuerId);
-        ledgerIssuanceTable.setStatusListIndex(statusListIndex);
-        ledgerIssuanceTable.setStatusListCredential(statusListCredentialUrl);
-        ledgerIssuanceTable.setStatusPurpose("revocation");
-        ledgerIssuanceTable.setCredentialStatus("valid");
-        ledgerIssuanceTable.setIssueDate(LocalDateTime.now());
-
         // 4. Get VC from configured plugin implementation
         VCResult<?> vcResult = getVerifiableCredential(credentialRequest, credentialMetadata,
-                proofValidator.getKeyMaterial(credentialRequest.getProof()), ledgerIssuanceTable);
+                proofValidator.getKeyMaterial(credentialRequest.getProof()));
 
         auditWrapper.logAudit(Action.VC_ISSUANCE, ActionStatus.SUCCESS,
                 AuditHelper.buildAuditDto(parsedAccessToken.getAccessTokenHash(), "accessTokenHash"), null);
 
-        ledgerIssuanceTableRepository.save(ledgerIssuanceTable);
         return getCredentialResponse(credentialRequest.getFormat(), vcResult);
     }
 
@@ -343,27 +320,16 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
     }
 
     private VCResult<?> getVerifiableCredential(CredentialRequest credentialRequest, CredentialMetadata credentialMetadata,
-                                                String holderId, LedgerIssuanceTable ledgerIssuanceTable) {
+                                                String holderId) {
         parsedAccessToken.getClaims().put("accessTokenHash", parsedAccessToken.getAccessTokenHash());
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat(credentialRequest.getFormat());
-
-
-        Map<String, Object> statusObject = new HashMap<>();
-        statusObject.put("id", ledgerIssuanceTable.getCredentialId());
-        statusObject.put("type", "BitstringStatusListEntry");
-//        statusObject.put("type", "CredentialStatusList2017");
-        statusObject.put("statusPurpose", ledgerIssuanceTable.getStatusPurpose());
-        statusObject.put("statusListIndex", ledgerIssuanceTable.getStatusListIndex());
-        statusObject.put("statusListCredential", ledgerIssuanceTable.getStatusListCredential());
-
         VCResult<?> vcResult = null;
         switch (credentialRequest.getFormat()) {
             case "ldp_vc" :
                 vcRequestDto.setContext(credentialRequest.getCredential_definition().getContext());
                 vcRequestDto.setType(credentialRequest.getCredential_definition().getType());
                 vcRequestDto.setCredentialSubject(credentialRequest.getCredential_definition().getCredentialSubject());
-                vcRequestDto.setCredentialStatus(statusObject);
 
                 validateLdpVcFormatRequest(credentialRequest, credentialMetadata);
                 try {
@@ -372,13 +338,10 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                     Map<String, Object> templateParams = new HashMap<>();
                     templateParams.put(Constants.TEMPLATE_NAME, CredentialUtils.getTemplateName(vcRequestDto));
                     templateParams.put(Constants.ISSUER_URI, issuerURI);
-//                    templateParams.put("credentialStatus", statusObject);
                     if (!StringUtils.isEmpty(renderTemplateId)) {
                         templateParams.put(Constants.RENDERING_TEMPLATE_ID, renderTemplateId);
                     }
                     jsonObject.put("_holderId", holderId);
-                    jsonObject.put("credentialStatus", new JSONObject(statusObject));
-//                    jsonObject.put("credentialStatus", ledgerIssuanceTable.getCredentialId());
                     String unSignedVC = vcFormatter.format(jsonObject, templateParams);
                     Map<String, String> signerSettings = new HashMap<>();
                     // NOTE: This is a quasi implementation to add support for multi-tenancy.
@@ -479,34 +442,6 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
 
     private long generateUniqueStatusListIndex() {
         return new Random().nextInt(131_072);
-    }
-
-    private String getOrCreateStatusListCredential(String issuerId, String statusPurpose){
-        Optional<StatusListCredential> existingList = statusListCredentialRepository
-                .findByIssuerIdAndStatusPurpose(issuerId, statusPurpose);
-        log.info("ExistingList: {}", existingList);
-
-        if (existingList.isPresent()) {
-            return existingList.get().getId();
-        }
-        // Find all issued credentials for this issuer and status purpose
-        List<LedgerIssuanceTable> issuedCredentials = ledgerIssuanceTableRepository
-                .findByIssuerIdAndStatusPurpose(issuerId, statusPurpose);
-
-        StatusListCredential statusListCredential = null;
-        try {
-            statusListCredential = BitStringUtils.generateStatusListCredential(
-                    issuedCredentials,
-                    issuerId,
-                    statusPurpose,
-                    domainUrl,
-                    STATUS_SIZE
-            );
-        } catch (BitstringStatusListException e) {
-            throw new RuntimeException(e);
-        }
-
-        return statusListCredential.getId();
     }
 
 }
