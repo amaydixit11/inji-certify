@@ -7,9 +7,9 @@ package io.mosip.certify.core.constants;
 
 public class ErrorConstants {
 
-    public static final String INVALID_REQUEST="invalid_request";
-    public static final String INVALID_SCOPE="invalid_scope";
-    public static final String INVALID_AUTH_TOKEN="invalid_token";
+    public static final String INVALID_REQUEST = "invalid_request";
+    public static final String INVALID_SCOPE = "invalid_scope";
+    public static final String INVALID_AUTH_TOKEN = "invalid_token";
     public static final String INVALID_ALGORITHM = "invalid_algorithm";
     public static final String UNKNOWN_ERROR = "unknown_error";
     public static final String UNSUPPORTED_VC_FORMAT = "unsupported_credential_format";
@@ -30,4 +30,14 @@ public class ErrorConstants {
     public static final String UNSUPPORTED_ALGORITHM = "unsupported_algorithm";
     public static final String INVALID_CERTIFICATE = "invalid_certificate";
     public static final String VERIFICATION_METHOD_GENERATION_FAILED = "verification_method_generation_failed";
+    public static final String CREDENTIAL_NOT_FOUND = "ERR_CREDENTIAL_NOT_FOUND";
+    public static final String INVALID_INPUT = "ERR_INVALID_INPUT";
+    public static final String STATUS_LIST_NOT_FOUND = "ERR_STATUS_LIST_NOT_FOUND";
+    public static final String STATUS_UPDATE_ERROR = "ERR_STATUS_UPDATE_ERROR";
+    public static final String STATUS_RETRIEVAL_ERROR = "ERR_STATUS_RETRIEVAL_ERROR";
+    public static final String STATUS_UPDATE_FORBIDDEN = "ERR_STATUS_UPDATE_FORBIDDEN";
+    public static final String STATUS_UPDATE_CONFLICT = "ERR_STATUS_UPDATE_CONFLICT";
+    public static final String DATABASE_ERROR = "ERR_DATABASE_ERROR";
+    public static final String CRYPTO_ERROR = "ERR_CRYPTO_ERROR";
+    public static final String STATUS_LIST_CREATION_FAILED = "STATUS_LIST_CREATION_FAILED";
 }

@@ -43,6 +43,17 @@ public class VCIssuanceController {
         return vcIssuanceService.getCredential(credentialRequest);
     }
 
+    /**
+     * 1. The credential Endpoint MUST accept Access Tokens
+     * @param credentialRequest VC credential request
+     * @return Credential Response w.r.t requested format
+     * @throws CertifyException
+     */
+    @PostMapping(value = "/credential/post",produces = "application/json")
+    public CredentialResponse updateCredentialStatus(@Valid @RequestBody CredentialRequest credentialRequest) throws CertifyException {
+        return vcIssuanceService.getCredential(credentialRequest);
+    }
+
 
     /**
      * 1. The credential Endpoint MUST accept Access Tokens

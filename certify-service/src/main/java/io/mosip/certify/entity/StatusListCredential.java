@@ -8,7 +8,7 @@ import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "status_list_credential", uniqueConstraints = @UniqueConstraint(columnNames = {"issuer_id", "status_purpose"}))
+@Table(name = "status_list_credentials")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,35 +17,22 @@ public class StatusListCredential {
     @Id
     private String id;
 
-    @Column(name = "issuer_id", nullable = false)
-    private String issuerId;
-
-    @Column(name = "type", nullable = false, columnDefinition = "VARCHAR(100) DEFAULT 'BitstringStatusListCredential'")
-    private String type = "BitstringStatusListCredential";
-
-    @Lob
-    @Column(name = "encoded_list", nullable = false)
-    private String encodedList;
-
-    @Column(name = "list_size", nullable = false)
-    private Integer listSize;
-
-    @Column(name = "status_purpose", nullable = false)
-    private String statusPurpose;
-
-    @Column(name = "status_size", columnDefinition = "integer DEFAULT 1")
-    private Integer statusSize = 1;
-
-    @Column(name = "status_messages", columnDefinition = "jsonb")
+    @Column(name = "vc_document", nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
-    private String statusMessages;
+    private Object vcDocument;
 
-    @Column(name = "valid_from", nullable = false)
-    private LocalDateTime validFrom;
+    @Column(name = "status_list_type", nullable = false)
+    private String statusListType;
 
-    @Column(name = "valid_until")
-    private LocalDateTime validUntil;
+    @Column(name = "list_purpose")
+    private String listPurpose;
 
-    @Column(name = "ttl")
-    private Long ttl;
+    @Column(name = "length", nullable = false)
+    private Long length;
+
+    @Column(name = "crd_times", nullable = false)
+    private LocalDateTime crdTimes;
+
+    @Column(name = "upd_times")
+    private LocalDateTime updTimes;
 }
