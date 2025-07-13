@@ -313,6 +313,36 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                     log.error("Error processing the SD-JWT :", e);
                     throw new CertifyException(ErrorConstants.VC_ISSUANCE_FAILED);
                 }
+            case "mso_mdoc":
+                vcRequestDto.setDoctype(credentialRequest.getDoctype());
+                try {
+                    JSONObject jsonObject = dataProviderPlugin.fetchData(parsedAccessToken.getClaims());
+                    Map<String, Object> templateParams = new HashMap<>();
+                    String templateName = CredentialUtils.getTemplateName(vcRequestDto);
+                    templateParams.put(Constants.TEMPLATE_NAME, templateName);
+                    templateParams.put(Constants.ISSUER_URI, issuerURI);
+
+                    Credential cred = credentialFactory.getCredential("mso_mdoc").orElseThrow(() -> new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT));
+
+                    jsonObject.put("_holderId", holderId);
+                    jsonObject.put("_docType", credentialRequest.getDoctype());
+                    jsonObject.put("_issuer", issuerURI);
+                    jsonObject.put("_validFrom", System.currentTimeMillis());
+//                    jsonObject.put("_validUntil", System.currentTimeMillis() + (365L * 24 * 60 * 60 * 1000)); // 1 year
+
+                    templateParams.putAll(jsonObject.toMap());
+                    String unsignedCredential = cred.createCredential(templateParams, templateName);
+
+                    return cred.addProof(unsignedCredential, "",
+                            vcFormatter.getProofAlgorithm(templateName),
+                            vcFormatter.getAppID(templateName),
+                            vcFormatter.getRefID(templateName),
+                            vcFormatter.getDidUrl(templateName));
+
+                } catch(DataProviderExchangeException e) {
+                    log.error("Error processing mDOC: ", e);
+                    throw new CertifyException(ErrorConstants.VC_ISSUANCE_FAILED);
+                }
                 default:
                     throw new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT);
             }
@@ -527,7 +557,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Credential not found: " + request.getCredentialId()));
 
         Optional<CredentialStatusTransaction> existingTransaction = credentialStatusTransactionRepository.findByCredentialId(request.getCredentialId());
-    
+
         CredentialStatusTransaction transaction = existingTransaction.orElse(new CredentialStatusTransaction());
 
         if (transaction.getTransactionLogId() == null) {
@@ -550,6 +580,6 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
         dto.setStatusListIndex(request.getCredentialStatus().getStatusListIndex());
         dto.setStatusPurpose(request.getCredentialStatus().getStatusPurpose());
         dto.setStatusTimestamp(savedTransaction.getCreatedDtimes());
-        return dto;        
+        return dto;
     }
 }
