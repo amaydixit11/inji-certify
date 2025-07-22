@@ -36,4 +36,7 @@ public class ErrorConstants {
     public static final String STATUS_RETRIEVAL_ERROR = "error_parsing_status_list_credential_document";
     public static final String INDEX_OUT_OF_BOUNDS = "requested_index_is_out_of_bounds_for_status_list_capacity";
     public static final String INVALID_FRAGMENT = "invalid_fragment_format_must_be_a_valid_number";
+    public static final String INVALID_DOCTYPE = "invalid_doctype";
+
+
 }
