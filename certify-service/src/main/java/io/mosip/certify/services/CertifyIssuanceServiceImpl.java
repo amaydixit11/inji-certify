@@ -17,14 +17,18 @@ import com.jayway.jsonpath.Option;
 import com.nimbusds.jwt.SignedJWT;
 import io.mosip.certify.api.util.AuditHelper;
 import io.mosip.certify.config.IndexedAttributesConfig;
+import io.mosip.certify.constants.VCFormats;
+import io.mosip.certify.core.constants.MDocConstants;
 import io.mosip.certify.core.dto.*;
 import io.mosip.certify.core.spi.CredentialConfigurationService;
+import io.mosip.certify.credential.MDocCredential;
 import io.mosip.certify.entity.CredentialStatusTransaction;
 import io.mosip.certify.entity.Ledger;
 import io.mosip.certify.entity.StatusListCredential;
 import io.mosip.certify.repository.CredentialStatusTransactionRepository;
 import io.mosip.certify.repository.LedgerRepository;
 import io.mosip.certify.repository.StatusListCredentialRepository;
+import io.mosip.certify.utils.MDocUtils;
 import io.mosip.certify.utils.VCIssuanceUtil;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
@@ -287,7 +291,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                     log.error(e.getMessage(), e);
                     throw new CertifyException(ErrorConstants.UNKNOWN_ERROR);
                 }
-                case "vc+sd-jwt":
+            case "vc+sd-jwt":
                 vcRequestDto.setSdJwtVct(credentialRequest.getSdJwtVct());
                 try {
                     // TODO(multitenancy): later decide which plugin out of n plugins is the correct one
@@ -315,36 +319,64 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                 }
             case "mso_mdoc":
                 vcRequestDto.setDoctype(credentialRequest.getDoctype());
+                vcRequestDto.setClaims(credentialRequest.getClaims());
+
                 try {
-                    JSONObject jsonObject = dataProviderPlugin.fetchData(parsedAccessToken.getClaims());
+                    // Prepare raw data for the data provider
+                    Map<String, Object> rawData = new HashMap<>();
+                    rawData.put(MDocConstants.DOCTYPE, vcRequestDto.getDoctype());
+                    rawData.put(MDocConstants.CLAIMS, vcRequestDto.getClaims());
+
+                    // Fetch data from the configured plugin
+                    JSONObject jsonObject = dataProviderPlugin.fetchData(rawData);
+                    log.info("Raw jsonObject from data provider: {}", jsonObject);
+
+                    // Prepare template parameters
                     Map<String, Object> templateParams = new HashMap<>();
                     String templateName = CredentialUtils.getTemplateName(vcRequestDto);
                     templateParams.put(Constants.TEMPLATE_NAME, templateName);
                     templateParams.put(Constants.ISSUER_URI, issuerURI);
 
-                    Credential cred = credentialFactory.getCredential("mso_mdoc").orElseThrow(() -> new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT));
+                    if (!StringUtils.isEmpty(renderTemplateId)) {
+                        templateParams.put(Constants.RENDERING_TEMPLATE_ID, renderTemplateId);
+                    }
 
+                    // Add holder ID for proof binding
                     jsonObject.put("_holderId", holderId);
-                    jsonObject.put("_docType", credentialRequest.getDoctype());
-                    jsonObject.put("_issuer", issuerURI);
-                    jsonObject.put("_validFrom", System.currentTimeMillis());
-//                    jsonObject.put("_validUntil", System.currentTimeMillis() + (365L * 24 * 60 * 60 * 1000)); // 1 year
+
+                    // Get the mDOC credential factory
+                    Credential cred = credentialFactory.getCredential(CredentialFormat.VC_MDOC.toString())
+                            .orElseThrow(() -> new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT));
 
                     templateParams.putAll(jsonObject.toMap());
-                    String unsignedCredential = cred.createCredential(templateParams, templateName);
 
-                    return cred.addProof(unsignedCredential, "",
-                            vcFormatter.getProofAlgorithm(templateName),
-                            vcFormatter.getAppID(templateName),
-                            vcFormatter.getRefID(templateName),
-                            vcFormatter.getDidUrl(templateName));
+                    // Create the unsigned mDOC credential using the formatter
+                    String unsignedCredential = cred.createCredential(templateParams, templateName);
+                    log.info("Generated unsigned mDOC credential: {}", unsignedCredential);
+
+                    //  // Add proof/signature to the credential
+                    //  VCResult<String> vcResult = cred.addProof(
+                    //          unsignedCredential,
+                    //          "",
+                    //          vcFormatter.getProofAlgorithm(templateName),
+                    //          vcFormatter.getAppID(templateName),
+                    //          vcFormatter.getRefID(templateName),
+                    //          vcFormatter.getDidUrl(templateName)
+                    //  );
+                    //  return vcResult;
 
                 } catch(DataProviderExchangeException e) {
-                    log.error("Error processing mDOC: ", e);
+                    log.error("Error fetching data from provider for mDOC: ", e);
+                    throw new CertifyException(e.getErrorCode());
+                } catch (JSONException e) {
+                    log.error("JSON processing error for mDOC: {}", e.getMessage(), e);
+                    throw new CertifyException(ErrorConstants.UNKNOWN_ERROR);
+                } catch (Exception e) {
+                    log.error("Unexpected error processing mDOC credential: {}", e.getMessage(), e);
                     throw new CertifyException(ErrorConstants.VC_ISSUANCE_FAILED);
                 }
-                default:
-                    throw new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT);
+            default:
+                throw new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT);
             }
     }
 
