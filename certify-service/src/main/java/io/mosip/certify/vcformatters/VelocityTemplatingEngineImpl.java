@@ -55,7 +55,7 @@ import static io.mosip.certify.core.constants.Constants.*;
 
 
 @Slf4j
-@Service
+@Service("velocityFormatter")
 public class VelocityTemplatingEngineImpl implements VCFormatter {
     VelocityEngine engine;
 
