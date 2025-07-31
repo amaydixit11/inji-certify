@@ -215,7 +215,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                     log.error(e.getMessage(), e);
                     throw new CertifyException(ErrorConstants.UNKNOWN_ERROR);
                 }
-                case "vc+sd-jwt":
+            case "vc+sd-jwt":
                 vcRequestDto.setVct(credentialRequest.getVct());
                 try {
                     // TODO(multitenancy): later decide which plugin out of n plugins is the correct one
@@ -241,8 +241,8 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                     log.error("Error processing the SD-JWT :", e);
                     throw new CertifyException(ErrorConstants.VC_ISSUANCE_FAILED);
                 }
-                default:
-                    throw new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT);
-            }
+            default:
+                throw new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT);
+        }
     }
 }
