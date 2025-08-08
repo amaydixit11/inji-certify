@@ -7,6 +7,14 @@
 	<listeners>
 		<listener class-name="io.mosip.testrig.apirig.report.EmailableReport" />
 	</listeners>
+	
+	<test name="WellKnownEndpoint">
+		<parameter name="ymlFile"
+			value="injicertify/WellKnownEndpoint/WellKnownEndpoint.yml" />
+		<classes>
+			<class name="io.mosip.testrig.apirig.injicertify.testscripts.GetWithParam" />
+		</classes>
+	</test>
 
 	<test name="OAuthDetailsRequestSunBirdC">
 		<parameter name="ymlFile"
@@ -347,6 +355,53 @@
 				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
 		</classes>
 	</test>
+	<test name="OAuthDetailsRequestVCIMosipIDNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCIMosipIDNegative/OAuthDetailsRequestVCINeg/OAuthDetailsRequestVCINeg.yml" />
+		<parameter name="idKeyName" value="transactionId,encodedResp" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="AuthenticateUserVCIMosipIDNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCIMosipIDNegative/AuthenticateUserVCINeg/AuthenticateUserVCINeg.yml" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.PostWithAutogenIdWithOtpGenerate" />
+		</classes>
+	</test>
+	<test name="AuthorizationCodeVCIMosipIDNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCIMosipIDNegative/AuthorizationCodeVCINeg/AuthorizationCodeVCINeg.yml" />
+		<parameter name="idKeyName" value="code" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="GenerateTokenVCIMosipIDNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCIMosipIDNegative/GenerateTokenVCINeg/GenerateTokenVCINeg.yml" />
+		<parameter name="idKeyName" value="access_token" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="GetCredentialMosipIDNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCIMosipIDNegative/GetCredentialMosipIDNeg/GetCredentialMosipIDNeg.yml" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>	
 	<test name="OAuthDetailsRequestVCIForMockIDA">
 		<parameter name="ymlFile"
 			value="injicertify/VCIMockIDA/OAuthDetailsRequestForMockIDA/OAuthDetailsRequestForMockIDA.yml" />
@@ -535,4 +590,363 @@
 				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
 		</classes>
 	</test>
+	<test name="OAuthDetailsRequestVCIForLandRegistry">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistry/OAuthDetailsRequestForLandRegistry/OAuthDetailsRequestForLandRegistry.yml" />
+		<parameter name="idKeyName" value="transactionId,encodedResp" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="AuthenticateUserVCIForLandRegistry">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistry/AuthenticateUserForLandRegistry/AuthenticateUserForLandRegistry.yml" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.PostWithAutogenIdWithOtpGenerate" />
+		</classes>
+	</test>
+	<test name="AuthorizationCodeVCIForLandRegistry">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistry/AuthorizationCodeForLandRegistry/AuthorizationCodeForLandRegistry.yml" />
+		<parameter name="idKeyName" value="code" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="GenerateTokenVCIForLandRegistry">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistry/GenerateTokenForLandRegistry/GenerateTokenForLandRegistry.yml" />
+		<parameter name="idKeyName" value="access_token" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="GetCredentialForLandRegistry">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistry/GetCredentialForLandRegistry/GetCredentialForLandRegistry.yml" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>
+	
+	<test name="OAuthDetailsRequestVCIForLandRegistryForVd11">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD11/OAuthDetailsRequestForLandRegistry/OAuthDetailsRequestForLandRegistry.yml" />
+		<parameter name="idKeyName" value="transactionId,encodedResp" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="AuthenticateUserVCIForLandRegistryForVd11">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD11/AuthenticateUserForLandRegistry/AuthenticateUserForLandRegistry.yml" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.PostWithAutogenIdWithOtpGenerate" />
+		</classes>
+	</test>
+	<test name="AuthorizationCodeVCIForLandRegistryForVd11">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD11/AuthorizationCodeForLandRegistry/AuthorizationCodeForLandRegistry.yml" />
+		<parameter name="idKeyName" value="code" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="GenerateTokenVCIForLandRegistryForVd11">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD11/GenerateTokenForLandRegistry/GenerateTokenForLandRegistry.yml" />
+		<parameter name="idKeyName" value="access_token" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="GetCredentialForLandRegistryForVd11">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD11/GetCredentialForLandRegistry/GetCredentialForLandRegistry.yml" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>
+	
+	<test name="OAuthDetailsRequestVCIForLandRegistryForVd12">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD12/OAuthDetailsRequestForLandRegistry/OAuthDetailsRequestForLandRegistry.yml" />
+		<parameter name="idKeyName" value="transactionId,encodedResp" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="AuthenticateUserVCIForLandRegistryForVd12">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD12/AuthenticateUserForLandRegistry/AuthenticateUserForLandRegistry.yml" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.PostWithAutogenIdWithOtpGenerate" />
+		</classes>
+	</test>
+	<test name="AuthorizationCodeVCIForLandRegistryForVd12">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD12/AuthorizationCodeForLandRegistry/AuthorizationCodeForLandRegistry.yml" />
+		<parameter name="idKeyName" value="code" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="GenerateTokenVCIForLandRegistryForVd12">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD12/GenerateTokenForLandRegistry/GenerateTokenForLandRegistry.yml" />
+		<parameter name="idKeyName" value="access_token" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="GetCredentialForLandRegistryForVd12">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryVD12/GetCredentialForLandRegistry/GetCredentialForLandRegistry.yml" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>
+	<test name="OAuthDetailsRequestVCIForLandRegistryNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryNeg/OAuthDetailsRequestForLandRegistry/OAuthDetailsRequestForLandRegistry.yml" />
+		<parameter name="idKeyName" value="transactionId,encodedResp" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="AuthenticateUserVCIForLandRegistryNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryNeg/AuthenticateUserForLandRegistry/AuthenticateUserForLandRegistry.yml" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.PostWithAutogenIdWithOtpGenerate" />
+		</classes>
+	</test>
+	<test name="AuthorizationCodeVCIForLandRegistryNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryNeg/AuthorizationCodeForLandRegistry/AuthorizationCodeForLandRegistry.yml" />
+		<parameter name="idKeyName" value="code" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="GenerateTokenVCIForLandRegistryNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryNeg/GenerateTokenForLandRegistry/GenerateTokenForLandRegistry.yml" />
+		<parameter name="idKeyName" value="access_token" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="GetCredentialForLandRegistryNeg">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistryNeg/GetCredentialForLandRegistry/GetCredentialForLandRegistry.yml" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>
+
+	<test name="OAuthDetailsRequestVCIFormDocMDL">
+		<parameter name="ymlFile"
+			value="injicertify/mDocMDL/OAuthDetailsRequestFormDoc/OAuthDetailsRequestFormDoc.yml" />
+		<parameter name="idKeyName" value="transactionId,encodedResp" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="AuthenticateUserVCIFormDoc">
+		<parameter name="ymlFile"
+			value="injicertify/mDocMDL/AuthenticateUserFormDoc/AuthenticateUserFormDoc.yml" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.PostWithAutogenIdWithOtpGenerate" />
+		</classes>
+	</test>
+	<test name="AuthorizationCodeVCImDoc">
+		<parameter name="ymlFile"
+			value="injicertify/mDocMDL/AuthorizationCodeFormDoc/AuthorizationCodeFormDoc.yml" />
+		<parameter name="idKeyName" value="code" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="GenerateTokenVCIFormDoc">
+		<parameter name="ymlFile"
+			value="injicertify/mDocMDL/GenerateTokenFormDoc/GenerateTokenFormDoc.yml" />
+		<parameter name="idKeyName" value="access_token" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="GetCredentialFormDoc">
+		<parameter name="ymlFile"
+			value="injicertify/mDocMDL/GetCredentialFormDoc/GetCredentialFormDoc.yml" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>
+	<test name="AddCredentialConfig">
+		<parameter name="ymlFile"
+			value="injicertify/CredentialConfig/NewCredentialConfiguration/AddCredentialConfiguration.yml" />
+		<parameter name="idKeyName" value="id" />
+		<parameter name="prerequisite" value="Yes" />			
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="GetCredentialConfig">
+		<parameter name="ymlFile"
+			value="injicertify/CredentialConfig/GetCredentialConfiguration/GetCredentialConfiguration.yml" />
+		<classes>
+			<class name="io.mosip.testrig.apirig.injicertify.testscripts.GetWithParam" />
+		</classes>
+	</test>
+	<test name="UpdateCredentialConfig">
+		<parameter name="ymlFile"
+			value="injicertify/CredentialConfig/UpdateCredentialConfiguration/UpdateCredentialConfiguration.yml" />
+		<parameter name="pathParams" value="configurationId" />			
+		<classes>
+			<class name="io.mosip.testrig.apirig.injicertify.testscripts.PutWithPathParamsAndBody" />
+		</classes>
+	</test>	
+	<test name="DeleteCredentialConfig">
+		<parameter name="ymlFile"
+			value="injicertify/CredentialConfig/DeleteCredentialConfiguration/DeleteCredentialConfiguration.yml" />
+		<classes>
+			<class name="io.mosip.testrig.apirig.injicertify.testscripts.DeleteWithParam" />
+		</classes>
+	</test>
+	<test name="GetSVGTemplate">
+		<parameter name="ymlFile"
+			value="injicertify/SVGTemplate/GetSVGTemplate/getSVGTemplate.yml" />
+		<classes>
+			<class name="io.mosip.testrig.apirig.injicertify.testscripts.GetWithParam" />
+		</classes>
+	</test>
+	<test name="AddCredentialConfigForEccR1">
+		<parameter name="ymlFile"
+			value="injicertify/EccR1/AddCredentialConfigEccR1/AddCredentialConfiguration.yml" />
+		<parameter name="idKeyName" value="id" />
+		<parameter name="prerequisite" value="Yes" />			
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+		<test name="OAuthDetailsRequestVCIForLandRegistryEccR1">
+		<parameter name="ymlFile"
+			value="injicertify/EccR1/OAuthDetailsRequestForLandRegistryEccR1/OAuthDetailsRequestForLandRegistry.yml" />
+		<parameter name="idKeyName" value="transactionId,encodedResp" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="AuthenticateUserVCIForLandRegistryEccR1">
+		<parameter name="ymlFile"
+			value="injicertify/EccR1/AuthenticateUserForLandRegistryEccR1/AuthenticateUserForLandRegistry.yml" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.PostWithAutogenIdWithOtpGenerate" />
+		</classes>
+	</test>
+	<test name="AuthorizationCodeVCIForLandRegistryEccR1">
+		<parameter name="ymlFile"
+			value="injicertify/EccR1/AuthorizationCodeForLandRegistryEccR1/AuthorizationCodeForLandRegistry.yml" />
+		<parameter name="idKeyName" value="code" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="GenerateTokenVCIForLandRegistryEccR1">
+		<parameter name="ymlFile"
+			value="injicertify/EccR1/GenerateTokenForLandRegistryEccR1/GenerateTokenForLandRegistry.yml" />
+		<parameter name="idKeyName" value="access_token" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="GetCredentialForLandRegistryEccR1">
+		<parameter name="ymlFile"
+			value="injicertify/EccR1/GetCredentialForLandRegistryEccR1/GetCredentialForLandRegistryEccR1.yml" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>
+	<test name="GetCredentialForLandRegistryForVd11EccR1">
+		<parameter name="ymlFile"
+			value="injicertify/EccR1/GetCredentialForLandRegistryEccR1/GetCredentialForLandRegistryEccR1vd11.yml" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>
+	<test name="GetCredentialForLandRegistryForVd12EccR1">
+		<parameter name="ymlFile"
+			value="injicertify/EccR1/GetCredentialForLandRegistryEccR1/GetCredentialForLandRegistryEccR1vd12.yml" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>
+	<test name="DeleteCredentialConfigForEccR1">
+		<parameter name="ymlFile"
+			value="injicertify/EccR1/DeleteCredentialConfiguration/DeleteCredentialConfiguration.yml" />
+		<classes>
+			<class name="io.mosip.testrig.apirig.injicertify.testscripts.DeleteWithParam" />
+		</classes>
+	</test>
+		
+	
 </suite>

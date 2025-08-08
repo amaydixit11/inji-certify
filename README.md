@@ -16,9 +16,9 @@ Instructions [here](./docker-compose/docker-compose-injistack/README.md).
 - Supported versions: 0.3.0 and above
 - Download the latest JAR from:
   ```
-  https://repo1.maven.org/maven2/io/mosip/certify/postgres-dataprovider-plugin/0.3.0/postgres-dataprovider-plugin-0.3.0.jar
+  https://oss.sonatype.org/content/repositories/snapshots/io/mosip/certify/postgres-dataprovider-plugin/0.3.0-SNAPSHOT/
   ```
-- Refer to the documentation of postgres plugin for required configurations: [Postgres Plugin Doc](https://github.com/mosip/digital-credential-plugins/blob/v0.3.0/postgres-dataprovider-plugin/README.md)
+- Refer to the documentation of postgres plugin for required configurations: [Postgres Plugin Doc](https://github.com/mosip/digital-credential-plugins/blob/release-0.3.x/postgres-dataprovider-plugin/README.md) 
 
 ### For Advanced Users: Create Custom Plugin
 
@@ -50,5 +50,5 @@ The following steps will help you to setup Sunbird RC and Esignet services using
       *  [Registry](https://github.com/challabeehyv/sunbird-devops/tree/main/deploy-as-code/helm/demo-mosip-registry)
       *  [Credential service, Credential schema service & Identity service](https://github.com/Sunbird-RC/devops/tree/main/deploy-as-code/helm/v2)
       *  [Vault](https://github.com/challabeehyv/sunbird-devops/blob/main/deploy-as-code/helm/v2/README.md#vault-deployment)
-   * [Esignet](https://github.com/mosip/esignet/tree/v1.4.1/helm)
-   * [Certify](https://github.com/mosip/inji-certify/tree/v0.10.2/deploy)
+   * [Esignet](https://github.com/mosip/esignet/tree/master/deploy)
+   * [Certify](deploy/README.md)
