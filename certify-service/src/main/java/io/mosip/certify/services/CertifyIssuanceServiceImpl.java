@@ -298,5 +298,4 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
             default:
                 throw new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT);
         }
-    }
 }

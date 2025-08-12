@@ -59,6 +59,7 @@ public class MDocCredential extends Credential {
         }
     }
 
+
 //    @Override
 //    public VCResult<?> addProof(String vcToSign, String headers, String signAlgorithm,
 //                                String appID, String refID, String publicKeyURL) {

@@ -134,6 +134,7 @@ public class MDocVCFormatter implements VCFormatter{
                 .map(sd -> Arrays.asList(sd.split(",")))
                 .orElseGet(ArrayList::new);
     }
+  
     /**
      * Gets the crypto suite used for VC signature or proof generation
      * @param templateName is the name of the template
