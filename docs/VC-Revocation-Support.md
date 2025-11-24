@@ -338,6 +338,96 @@ mosip.certify.data-provider-plugin.credential-status.allowed-status-purposes={'r
 
 ---
 
+## Indexed Attributes Configuration
+
+The indexed attributes feature allows you to extract and store specific fields from issued credentials in the ledger for efficient searching. This enables you to query credentials based on custom attributes using the `/ledger-search` endpoint.
+
+### Overview
+
+When credentials are issued and stored in the ledger, you can configure which fields should be extracted and indexed for searching. These indexed attributes are stored alongside the credential metadata and can be used to filter search results.
+
+### Configuration Format
+
+Indexed attributes are configured using the `mosip.certify.indexed-mappings` property prefix.
+
+**Syntax:**
+```properties
+mosip.certify.indexed-mappings.<attribute-name>=<jsonpath-expression>
+```
+
+### JSONPath Expressions
+
+The system uses JSONPath to extract values from credential JSON documents. Common patterns include:
+
+- `$.fieldName` - Extract a top-level field
+- `$.nested.field` - Extract a nested field
+- `$.array[0]` - Extract first element of an array
+- `$.object.array[*]` - Extract all elements from an array
+
+### Configuration Examples
+
+**Basic Configuration:**
+```properties
+# Extract the credential ID
+mosip.certify.indexed-mappings.credential-id=$.id
+
+# Extract the first credential type
+mosip.certify.indexed-mappings.credential-type=$.type[0]
+
+# Extract the issuer
+mosip.certify.indexed-mappings.issuer=$.issuer
+
+# Extract custom fields from credentialSubject
+mosip.certify.indexed-mappings.national-id=$.credentialSubject.nationalId
+mosip.certify.indexed-mappings.full-name=$.credentialSubject.fullName
+```
+
+**Complex Nested Attributes:**
+```properties
+# Extract nested address information
+mosip.certify.indexed-mappings.postal-code=$.credentialSubject.address.postalCode
+mosip.certify.indexed-mappings.village=$.credentialSubject.address.villageOrTown
+
+# Extract identification numbers
+mosip.certify.indexed-mappings.farmer-id=$.credentialSubject.farmerID
+mosip.certify.indexed-mappings.mobile-number=$.credentialSubject.mobileNumber
+```
+
+### Example Credential Structure
+
+For a farmer credential with this structure:
+```json
+{
+  "id": "afce16e8-02ac-4210-80d9-a0a20132bda3",
+  "type": ["FarmerCredential", "VerifiableCredential"],
+  "issuer": "did:web:sample.github.io:my-files:sample",
+  "credentialSubject": {
+    "id": "did:example:farmer123",
+    "fullName": "John Doe",
+    "nationalId": "123456789",
+    "farmerID": "FARM-2024-001",
+    "mobileNumber": "+1234567890",
+    "address": {
+      "state": "Karnataka",
+      "district": "Bengaluru",
+      "villageOrTown": "Whitefield",
+      "postalCode": "560066"
+    },
+    "landOwnershipType": "Owned",
+    "primaryCropType": "Rice"
+  }
+}
+```
+
+You could configure these mappings:
+```properties
+mosip.certify.indexed-mappings.farmer-id=$.credentialSubject.farmerID
+mosip.certify.indexed-mappings.state=$.credentialSubject.address.state
+mosip.certify.indexed-mappings.district=$.credentialSubject.address.district
+mosip.certify.indexed-mappings.crop-type=$.credentialSubject.primaryCropType
+```
+---
+
 ## Enabling the Feature
 
 1. **Database Setup**: Make sure the following tables exist:
