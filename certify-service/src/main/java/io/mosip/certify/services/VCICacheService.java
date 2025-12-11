@@ -2,10 +2,7 @@ package io.mosip.certify.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.certify.core.constants.Constants;
-import io.mosip.certify.core.dto.CredentialOfferResponse;
-import io.mosip.certify.core.dto.PreAuthCodeData;
-import io.mosip.certify.core.dto.Transaction;
-import io.mosip.certify.core.dto.VCIssuanceTransaction;
+import io.mosip.certify.core.dto.*;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +16,7 @@ import io.mosip.certify.services.CredentialConfigurationServiceImpl;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -30,6 +28,9 @@ public class VCICacheService {
 
     @Autowired
     private CredentialConfigurationServiceImpl credentialConfigurationService;
+
+    @Autowired
+    private AuthorizationServerService authServerService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -140,6 +141,12 @@ public class VCICacheService {
                 });
                 metadataMap.put(Constants.CREDENTIAL_CONFIGURATIONS_SUPPORTED, credentialConfigsMap);
 
+                List<String> authServers = authServerService.getAllAuthorizationServerUrls();
+                if (!authServers.isEmpty()) {
+                    metadataMap.put(Constants.AUTHORIZATION_SERVERS, authServers);
+                    log.info("Added {} authorization servers to cached metadata", authServers.size());
+                }
+
                 // Store in cache
                 cache.put(METADATA_KEY, metadataMap);
 
@@ -191,5 +198,79 @@ public class VCICacheService {
      */
     public Transaction getTransactionByToken(String accessToken) {
         return cacheManager.getCache(VCISSUANCE_CACHE).get(accessToken, Transaction.class);
+    }
+
+    /**
+     * Cache authorization server metadata
+     */
+    public void setASMetadata(String serverUrl, AuthorizationServerMetadata metadata) {
+        String key = Constants.AS_METADATA_PREFIX + serverUrl;
+        Cache cache = cacheManager.getCache("asMetadataCache");
+        if (cache == null) {
+            throw new IllegalStateException("asMetadataCache not available");
+        }
+        cache.put(key, metadata);
+        log.info("Cached AS metadata for: {}", serverUrl);
+    }
+
+    /**
+     * Get cached authorization server metadata
+     */
+    public AuthorizationServerMetadata getASMetadata(String serverUrl) {
+        String key = Constants.AS_METADATA_PREFIX + serverUrl;
+        Cache cache = cacheManager.getCache("asMetadataCache");
+        if (cache == null) {
+            log.error("Cache {} not available", "asMetadataCache");
+            return null;
+        }
+        Cache.ValueWrapper wrapper = cache.get(key);
+        return wrapper != null ? (AuthorizationServerMetadata) wrapper.get() : null;
+    }
+
+    /**
+     * Evict cached AS metadata for a specific server
+     */
+    public void evictASMetadata(String serverUrl) {
+        String key = Constants.AS_METADATA_PREFIX + serverUrl;
+        Cache cache = cacheManager.getCache("asMetadataCache");
+        if (cache != null) {
+            cache.evict(key);
+            log.info("Evicted AS metadata cache for: {}", serverUrl);
+        }
+    }
+
+    /**
+     * Clear all AS metadata cache
+     */
+    public void clearASMetadataCache() {
+        Cache cache = cacheManager.getCache("asMetadataCache");
+        if (cache != null) {
+            cache.clear();
+            log.info("Cleared all AS metadata cache");
+        }
+    }
+
+    /**
+     * Cache credential configuration to AS mapping
+     */
+    public void setCredentialConfigMapping(String credentialConfigId, String authServerUrl) {
+        Cache cache = cacheManager.getCache("credentialConfigMappingCache");
+        if (cache == null) {
+            throw new IllegalStateException("credentialConfigMappingCache not available");
+        }
+        cache.put(credentialConfigId, authServerUrl);
+        log.debug("Cached credential config mapping: {} -> {}", credentialConfigId, authServerUrl);
+    }
+
+    /**
+     * Get cached credential configuration to AS mapping
+     */
+    public String getCredentialConfigMapping(String credentialConfigId) {
+        Cache cache = cacheManager.getCache("credentialConfigMappingCache");
+        if (cache == null) {
+            return null;
+        }
+        Cache.ValueWrapper wrapper = cache.get(credentialConfigId);
+        return wrapper != null ? (String) wrapper.get() : null;
     }
 }
