@@ -73,6 +73,9 @@ public class CredentialConfigurationServiceImpl implements CredentialConfigurati
     @Value("#{${mosip.certify.credential-config.as-mapping:{}}}")
     private Map<String, String> authorizationServerMapping;
 
+    @Value("${mosip.certify.authorization.default-server}")
+    private String defaultAuthorizationServer;
+
 
     private static final String CREDENTIAL_CONFIG_CACHE_NAME = "credentialConfig";
 
@@ -187,9 +190,9 @@ public class CredentialConfigurationServiceImpl implements CredentialConfigurati
         boolean isMatch = keyAliasList.stream()
                 .anyMatch(pair ->
                         credentialConfig.getKeyManagerAppId() != null &&
-                        pair.getFirst().equals(credentialConfig.getKeyManagerAppId()) &&
-                        credentialConfig.getKeyManagerRefId() != null &&
-                        pair.getLast().equals(credentialConfig.getKeyManagerRefId()));
+                                pair.getFirst().equals(credentialConfig.getKeyManagerAppId()) &&
+                                credentialConfig.getKeyManagerRefId() != null &&
+                                pair.getLast().equals(credentialConfig.getKeyManagerRefId()));
 
         if (!isMatch) {
             throw new CertifyException(ErrorConstants.KEY_CHOOSER_APP_REF_NOT_FOUND, "No matching appId and refId found in the key chooser configuration.");
@@ -288,7 +291,12 @@ public class CredentialConfigurationServiceImpl implements CredentialConfigurati
                     });
             credentialIssuerMetadata.setCredentialConfigurationSupportedDTO(credentialConfigurationSupportedMap);
             credentialIssuerMetadata.setCredentialIssuer(credentialIssuer);
-            List<String> authServers = authorizationServerMapping.values().stream().distinct().toList();
+            List<String> authServers = (authorizationServerMapping == null || authorizationServerMapping.isEmpty())
+                    ? Collections.emptyList()
+                    : authorizationServerMapping.values().stream().distinct().toList();
+            if(authServers.isEmpty() && defaultAuthorizationServer != null){
+                authServers = Collections.singletonList(defaultAuthorizationServer);
+            }
             credentialIssuerMetadata.setAuthorizationServers(authServers);
             String credentialEndpoint = credentialIssuer + servletPath + "/issuance" + (!version.equals("latest") ? "/" + version : "") + "/credential";
             credentialIssuerMetadata.setCredentialEndpoint(credentialEndpoint);
@@ -308,7 +316,12 @@ public class CredentialConfigurationServiceImpl implements CredentialConfigurati
             credentialIssuerMetadata.setCredentialConfigurationSupportedDTO(credentialConfigurationSupportedMap); // Use a different setter for vd12
             credentialIssuerMetadata.setCredentialIssuer(credentialIssuer);
             // credentialIssuerMetadata.setAuthorizationServers(Collections.singletonList(authUrl));
-            List<String> authServers = authorizationServerMapping.values().stream().distinct().toList();
+            List<String> authServers = (authorizationServerMapping == null || authorizationServerMapping.isEmpty())
+                    ? Collections.emptyList()
+                    : authorizationServerMapping.values().stream().distinct().toList();
+            if(authServers.isEmpty() && defaultAuthorizationServer != null){
+                authServers = Collections.singletonList(defaultAuthorizationServer);
+            }
             credentialIssuerMetadata.setAuthorizationServers(authServers);
             String credentialEndpoint = credentialIssuer + servletPath + "/issuance/" + version + "/credential";
             credentialIssuerMetadata.setCredentialEndpoint(credentialEndpoint);
@@ -328,7 +341,12 @@ public class CredentialConfigurationServiceImpl implements CredentialConfigurati
                     });
             credentialIssuerMetadata.setCredentialConfigurationSupportedDTO(credentialConfigurationSupportedList); // Use a different setter for vd11
             credentialIssuerMetadata.setCredentialIssuer(credentialIssuer);
-            List<String> authServers = authorizationServerMapping.values().stream().distinct().toList();
+            List<String> authServers = (authorizationServerMapping == null || authorizationServerMapping.isEmpty())
+                    ? Collections.emptyList()
+                    : authorizationServerMapping.values().stream().distinct().toList();
+            if(authServers.isEmpty() && defaultAuthorizationServer != null){
+                authServers = Collections.singletonList(defaultAuthorizationServer);
+            }
             credentialIssuerMetadata.setAuthorizationServers(authServers);
             String credentialEndpoint = credentialIssuer + servletPath + "/issuance/" + version + "/credential";
             credentialIssuerMetadata.setCredentialEndpoint(credentialEndpoint);
